@@ -10,5 +10,7 @@ namespace Usuario.Model
         public int Id { get; set; }
         public string Name { get; set; }
         public DateTime DataNascimento { get; set; }
+Public string CPF {get; set;}
+Public string Endereço {get; set;}
     }
 }
