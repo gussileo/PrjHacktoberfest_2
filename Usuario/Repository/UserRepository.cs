@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+
 using Usuario.Data;
 using Usuario.Model;
 
@@ -37,11 +34,11 @@ namespace Usuario.Repository
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<User> SearchUser(int Id)
+        public async Task<User?> SearchUser(int Id)
         {
             return await _context.Users.Where(x => x.Id == Id).FirstOrDefaultAsync();
         }
-        
+
 
         public void UpdateUser(User user)
         {
