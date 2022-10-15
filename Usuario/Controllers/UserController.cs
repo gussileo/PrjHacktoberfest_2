@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+
 using Usuario.Model;
 using Usuario.Repository;
 
@@ -23,7 +20,7 @@ namespace Usuario.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var users = await _repository.SearchUser();
+            IEnumerable<User> users = await _repository.SearchUser();
             return users.Any()
                     ? Ok(users)
                     : NoContent();
@@ -33,7 +30,7 @@ namespace Usuario.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var user = await _repository.SearchUser(id);
+            User? user = await _repository.SearchUser(id);
             return user != null
                     ? Ok(user)
                     : NotFound("Usuário não encontrado");
@@ -52,11 +49,16 @@ namespace Usuario.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, User user)
         {
-            var users = await _repository.SearchUser(id);
-            if (users == null) return NotFound("Usuário não encontrado");
-            users.Name = user.Name ?? users.Name;
-            users.DataNascimento = user.DataNascimento != new DateTime()
+            User? users = await _repository.SearchUser(id);
+            if (users == null)
+            {
+                return NotFound("Usuário não encontrado");
+            }
+
+            string nome = user.Name ?? users.Name;
+            DateTime dataNascimento = user.DataNascimento != new DateTime()
                 ? user.DataNascimento : users.DataNascimento;
+            users.AtualizaNomeEDataNascimento(nome, dataNascimento);
 
             _repository.UpdateUser(users);
 
@@ -66,10 +68,13 @@ namespace Usuario.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete (int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var users = await _repository.SearchUser(id);
-            if (users == null) return NotFound("Usuário não encontrado");
+            User? users = await _repository.SearchUser(id);
+            if (users == null)
+            {
+                return NotFound("Usuário não encontrado");
+            }
 
             _repository.DeleteUser(users);
 

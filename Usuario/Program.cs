@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+
 using Usuario.Data;
 using Usuario.Repository;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
@@ -12,11 +14,23 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<UserContext>(
-    x => x.UseSqlite(builder.Configuration.GetConnectionString("DefaultContext"))
+    options =>
+    {
+        if (builder.Configuration["DbTarget"] == "InMemory")
+        {
+            options.UseInMemoryDatabase("Usuarios")
+                   .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        }
+        else
+        {
+            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultContext"));
+        }
+    }
 );
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
